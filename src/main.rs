@@ -3,12 +3,12 @@ use std::path::PathBuf;
 use axum::{routing::get, Router, Json, response::{Response, IntoResponse}};
 use axum_extra::routing::SpaRouter;
 
-use shared::{self, Habit};
+use shared::{Habit, Cadance};
 
 async fn habits() -> Response {
     let habits = vec![
-         Habit {name: "run".to_string(), desciription: "".to_string(), cadance: shared::Cadance::Weekly, reps: 1},
-         Habit {name: "iron".to_string(), desciription: "eat iron suplements".to_string(), cadance: shared::Cadance::Daily, reps: 1},
+         Habit {name: "run".to_string(), desciription: "".to_string(), cadance: Cadance::Weekly, reps: 1},
+         Habit {name: "iron".to_string(), desciription: "eat iron suplements".to_string(), cadance: Cadance::Daily, reps: 1},
     ];
     return Json(habits).into_response();
 }
