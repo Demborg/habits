@@ -3,8 +3,8 @@ set -e
 
 pushd frontend
 trunk build --release
-cp -r dist ../backend/dist
+rm -rf ../backend/dist
+cp -r dist ../backend/
 popd
 
-pushd backend
-cargo shuttle deploy
+cargo shuttle deploy --working-directory ./backend

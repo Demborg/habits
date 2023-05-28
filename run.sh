@@ -3,7 +3,8 @@ set -e
 
 pushd frontend
 trunk build
-cp -r dist ../backend/dist
+rm -rf ../backend/dist
+cp -r dist ../backend/
 popd
 
 pushd backend
