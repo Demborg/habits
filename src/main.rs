@@ -15,7 +15,7 @@ async fn habits() -> Response {
 
 #[shuttle_runtime::main]
 async fn axum(
-    #[shuttle_static_folder::StaticFolder(folder="frontend/dist")] frontend: PathBuf,
+    #[shuttle_static_folder::StaticFolder(folder="./dist")] frontend: PathBuf,
 ) -> shuttle_axum::ShuttleAxum {
     let router = Router::new()
         .route("/habits", get(habits))
