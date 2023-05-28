@@ -1,14 +1,16 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub enum Cadance {
+   Daily,
+   Weekly,
+   Monthly,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[derive(Serialize)]
+pub struct Habit {
+    pub name: String,
+    pub desciription: String,
+    pub cadance: Cadance,
+    pub reps: i32,
 }
