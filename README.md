@@ -1,4 +1,4 @@
-# Habits
+# [Habits](https://habits.shuttleapp.rs/)
 Experimenting with learning rust by builidng a full-stack habit trackign application all in rust.
 
 - Frontend: [Yew](https://yew.rs)
