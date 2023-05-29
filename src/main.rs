@@ -1,16 +1,24 @@
 use std::path::PathBuf;
 
-use axum::{routing::get, Router, Json, response::{Response, IntoResponse}};
+use axum::{routing::{get, post}, Router, Json, response::{Response, IntoResponse}, extract::State};
 use axum_extra::routing::SpaRouter;
 
 use shared::{Habit, Cadance};
-use sqlx::{PgPool};
+use sqlx::{PgPool, Row};
 
-async fn habits() -> Response {
-    let habits = vec![
-         Habit {name: "run".to_string(), desciription: "".to_string(), cadance: Cadance::Weekly, reps: 1},
-         Habit {name: "iron".to_string(), desciription: "eat iron suplements".to_string(), cadance: Cadance::Daily, reps: 1},
-    ];
+async fn habits(State(pool): State<PgPool>) -> Response {
+    let rows = sqlx::query(
+        "SELECT name, description, cadence, reps FROM habits",
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(shuttle_runtime::CustomError::new).unwrap();
+
+    let habits = rows.into_iter().map(|row| {
+        Habit {name: row.get("name"), desciription: row.get("description"), cadance: Cadance::from(row.get("cadence")).unwrap(), reps: row.get("reps")}
+    });
+
+    let habits: Vec<Habit> = habits.collect();
     return Json(habits).into_response();
 }
 
@@ -23,6 +31,18 @@ async fn axum(
 
     let router = Router::new()
         .route("/habits", get(habits))
-        .merge(SpaRouter::new("/", frontend).index_file("index.html"));
+        .route("/habit", post(create_habit))
+        .merge(SpaRouter::new("/", frontend).index_file("index.html"))
+        .with_state(pool);
     Ok(router.into())
+}
+
+async fn create_habit(State(pool): State<PgPool>, Json(habit): Json<Habit>) -> (){
+    sqlx::query("INSERT INTO habits (name, description, cadence, reps) VALUES ($1, $2, $3, $4)")
+        .bind(habit.name)
+        .bind(habit.desciription)
+        .bind(habit.cadance.to_string())
+        .bind(habit.reps)
+        .execute(&pool)
+        .await;
 }

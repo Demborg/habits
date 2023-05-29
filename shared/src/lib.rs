@@ -25,3 +25,16 @@ pub struct Habit {
     pub cadance: Cadance,
     pub reps: i32,
 }
+
+impl Cadance {
+    pub fn from(text: &str) -> Option<Cadance> {
+        match text {
+            "daily" => Some(Cadance::Daily),
+            "weekly" => Some(Cadance::Weekly),
+            "monthly" => Some(Cadance::Monthly),
+            _ => None,
+
+        }
+    }
+
+}
