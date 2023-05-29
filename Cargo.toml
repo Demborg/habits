@@ -13,4 +13,11 @@ axum-extra = { version = "0.4.2", features = ["spa"] }
 shuttle-axum = "0.17.0"
 tokio = "1.28.1"
 shuttle-static-folder = "0.17.0"
+shuttle-shared-db = {version = "0.17.0", features = ["postgres"]}
 shared = { path = "./shared" }
+sqlx = { version = "0.6.2", features = [
+    "postgres",
+    "migrate",
+    "chrono",
+    "offline",
+] }
