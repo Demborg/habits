@@ -4,7 +4,7 @@ use axum::{routing::get, Router, Json, response::{Response, IntoResponse}};
 use axum_extra::routing::SpaRouter;
 
 use shared::{Habit, Cadance};
-use sqlx::PgPool;
+use sqlx::{PgPool};
 
 async fn habits() -> Response {
     let habits = vec![
@@ -16,9 +16,11 @@ async fn habits() -> Response {
 
 #[shuttle_runtime::main]
 async fn axum(
-    #[shuttle_shared_db::Postgres] _pool: PgPool,
+    #[shuttle_shared_db::Postgres] pool: PgPool,
     #[shuttle_static_folder::StaticFolder(folder="./dist")] frontend: PathBuf,
 ) -> shuttle_axum::ShuttleAxum {
+    sqlx::migrate!().run(&pool).await.map_err(shuttle_runtime::CustomError::new)?;
+
     let router = Router::new()
         .route("/habits", get(habits))
         .merge(SpaRouter::new("/", frontend).index_file("index.html"));
