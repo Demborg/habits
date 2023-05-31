@@ -26,6 +26,14 @@ pub struct Habit {
     pub reps: i32,
 }
 
+pub type Completions = Vec<(String, i64)>;
+
+#[derive(Serialize, Deserialize, PartialEq, Clone)]
+pub struct HabitWithCompletions {
+    pub habit: Habit,
+    pub completions: Completions
+}
+
 impl Cadance {
     pub fn from(text: &str) -> Option<Cadance> {
         match text {

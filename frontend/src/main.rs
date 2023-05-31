@@ -1,21 +1,22 @@
 use yew::prelude::*;
 use gloo_net::http::Request;
 
-use shared::{Habit};
+use shared::{HabitWithCompletions};
 
 #[derive(Properties, PartialEq)]
 struct HabitListProps {
-    habits: Vec<Habit>,
+    habits: Vec<HabitWithCompletions>,
 }
-
 
 #[function_component(HabitList)]
 fn habit_list(HabitListProps { habits }: &HabitListProps) -> Html {
-    habits.iter().map(|habit| html! {
+    habits.iter().map(|habit| {
+        let completions = habit.completions.first().map(|x| x.1).unwrap_or(0);
+        html! {
         <div>
-            <h3>{format!("remember to {} {} times {}", habit.name, habit.reps, habit.cadance)}</h3>
+            <h3>{format!("{} {}/{} times {}", habit.habit.name, completions, habit.habit.reps, habit.habit.cadance)}</h3>
         </div>
-    }).collect()
+    }}).collect()
 }
 
 #[function_component(App)]
@@ -26,7 +27,7 @@ fn app() -> Html {
         use_effect_with((), move |_| {
             let habits = habits.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_habits: Vec<Habit> = Request::get("/habits")
+                let fetched_habits: Vec<HabitWithCompletions> = Request::get("/habits")
                     .send()
                     .await
                     .unwrap()

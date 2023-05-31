@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_extra::routing::SpaRouter;
 
-use shared::{Cadance, Habit};
+use shared::{Cadance, Habit, Completions, HabitWithCompletions};
 use sqlx::{PgPool, Row};
 
 fn date_pattern(cadance: &Cadance) -> String {
@@ -19,7 +19,7 @@ fn date_pattern(cadance: &Cadance) -> String {
     }
 }
 
-async fn get_completions(pool: &PgPool, habit: &Habit) -> Vec<(String, i64)> {
+async fn get_completions(pool: &PgPool, habit: &Habit) -> Completions {
     let rows = sqlx::query("SELECT TO_CHAR(completion_timestamp, $2) as day, COUNT(completion_timestamp) as count FROM habit_completions INNER JOIN habits ON habits.id = habit_completions.habit_id WHERE name = $1 GROUP BY TO_CHAR(completion_timestamp, $2) ORDER BY MAX(completion_timestamp)")
         .bind(&habit.name)
         .bind(date_pattern(&habit.cadance))
@@ -47,11 +47,11 @@ async fn habits(State(pool): State<PgPool>) -> Response {
         reps: row.get("reps"),
     });
 
-    let mut result: Vec<(Habit, Vec<(String, i64)>)> = vec![];
+    let mut result: Vec<HabitWithCompletions> = vec![];
 
     for habit in habits {
         let completions = get_completions(&pool, &habit).await;
-        result.push((habit, completions))
+        result.push(HabitWithCompletions {habit: habit, completions: completions});
     }
 
     return Json(result).into_response();
