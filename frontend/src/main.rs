@@ -27,6 +27,7 @@ fn habit_list(HabitProps { habit }: &HabitProps) -> Html {
     html! {
         <div onclick={onclick}>
             <h3>{format!("{} {}/{} times {}", habit.habit.name, habit.completed + *other_clicks, habit.habit.reps, habit.habit.cadance)}</h3>
+            <p>{habit.urgency()}</p>
         </div>
     }
 }
