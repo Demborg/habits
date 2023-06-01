@@ -1,3 +1,4 @@
+use gloo_console::log;
 use gloo_net::http::Request;
 use yew::prelude::*;
 
@@ -11,8 +12,20 @@ struct HabitProps {
 fn habit_list(HabitProps { habit }: &HabitProps) -> Html {
     let clicks = use_state(|| 0);
     let other_clicks = clicks.clone();
+    let name = habit.habit.name.clone();
+    let onclick = move |_| {
+        clicks.set(*clicks + 1);
+        let url = format!("/complete/{}", name);
+        wasm_bindgen_futures::spawn_local(async move {
+            Request::get(&url)
+                .send()
+                .await
+                .expect("Couldn't complete");
+            log!("Completed the task!");
+        });
+    };
     html! {
-        <div onclick={move |_| clicks.set(*clicks + 1)}>
+        <div onclick={onclick}>
             <h3>{format!("{} {}/{} times {}", habit.habit.name, habit.completed + *other_clicks, habit.habit.reps, habit.habit.cadance)}</h3>
         </div>
     }
