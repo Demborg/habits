@@ -19,7 +19,7 @@ fn date_pattern(cadance: &Cadance) -> String {
     }
 }
 
-async fn get_completions(pool: &PgPool, habit: &Habit) -> Completions {
+async fn get_history(pool: &PgPool, habit: &Habit) -> Completions {
     let rows = sqlx::query("SELECT TO_CHAR(completion_timestamp, $2) as day, COUNT(completion_timestamp) as count FROM habit_completions INNER JOIN habits ON habits.id = habit_completions.habit_id WHERE name = $1 GROUP BY TO_CHAR(completion_timestamp, $2) ORDER BY MAX(completion_timestamp)")
         .bind(&habit.name)
         .bind(date_pattern(&habit.cadance))
@@ -31,6 +31,16 @@ async fn get_completions(pool: &PgPool, habit: &Habit) -> Completions {
         .into_iter()
         .map(|row| (row.get("day"), row.get("count")));
     completions.collect()
+}
+
+async fn get_completed(pool: &PgPool, habit: &Habit) -> i64 {
+    sqlx::query("SELECT COUNT(habit_completions.id) as count FROM habit_completions INNER JOIN habits ON habits.id = habit_completions.habit_id WHERE name = $1 AND TO_CHAR(completion_timestamp, $2) = TO_CHAR(NOW(), $2)")
+        .bind(&habit.name)
+        .bind(date_pattern(&habit.cadance))
+        .fetch_one(pool)
+        .await
+        .expect("Expect to be able to get completions")
+        .get("count")
 }
 
 async fn habits(State(pool): State<PgPool>) -> Response {
@@ -50,8 +60,9 @@ async fn habits(State(pool): State<PgPool>) -> Response {
     let mut result: Vec<HabitWithCompletions> = vec![];
 
     for habit in habits {
-        let completions = get_completions(&pool, &habit).await;
-        result.push(HabitWithCompletions {habit: habit, completions: completions});
+        let completions = get_history(&pool, &habit).await;
+        let current = get_completed(&pool, &habit).await;
+        result.push(HabitWithCompletions {habit: habit, completed: current, history: completions});
     }
 
     return Json(result).into_response();

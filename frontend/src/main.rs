@@ -11,10 +11,9 @@ struct HabitListProps {
 #[function_component(HabitList)]
 fn habit_list(HabitListProps { habits }: &HabitListProps) -> Html {
     habits.iter().map(|habit| {
-        let completions = habit.completions.first().map(|x| x.1).unwrap_or(0);
         html! {
         <div>
-            <h3>{format!("{} {}/{} times {}", habit.habit.name, completions, habit.habit.reps, habit.habit.cadance)}</h3>
+            <h3>{format!("{} {}/{} times {}", habit.habit.name, habit.completed, habit.habit.reps, habit.habit.cadance)}</h3>
         </div>
     }}).collect()
 }

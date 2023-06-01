@@ -31,7 +31,8 @@ pub type Completions = Vec<(String, i64)>;
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub struct HabitWithCompletions {
     pub habit: Habit,
-    pub completions: Completions
+    pub completed: i64,
+    pub history: Completions
 }
 
 impl Cadance {
