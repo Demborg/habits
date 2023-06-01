@@ -27,7 +27,7 @@ fn habit_list(HabitProps { habit }: &HabitProps) -> Html {
     html! {
         <div onclick={onclick}>
             <h3>{format!("{} {}/{} times {}", habit.habit.name, habit.completed + *other_clicks, habit.habit.reps, habit.habit.cadance)}</h3>
-            <p>{habit.urgency()}</p>
+            <p>{"Urgency: "}{habit.urgency()}</p>
         </div>
     }
 }
@@ -55,13 +55,14 @@ fn app() -> Html {
         use_effect_with((), move |_| {
             let habits = habits.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_habits: Vec<HabitWithCompletions> = Request::get("/habits")
+                let mut fetched_habits: Vec<HabitWithCompletions> = Request::get("/habits")
                     .send()
                     .await
                     .unwrap()
                     .json()
                     .await
                     .unwrap();
+                fetched_habits.sort_unstable_by(|a, b| b.urgency().total_cmp(&a.urgency()));
                 habits.set(fetched_habits);
             });
             || ()
