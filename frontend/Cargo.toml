@@ -10,3 +10,4 @@ gloo-net = "0.2"
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
 wasm-bindgen-futures = "0.4"
 shared = { path = "../shared" }
+gloo-console = "0.2.3"

@@ -64,6 +64,7 @@ dependencies = [
 name = "frontend"
 version = "0.1.0"
 dependencies = [
+ "gloo-console",
  "gloo-net",
  "shared",
  "wasm-bindgen-futures",
