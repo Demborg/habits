@@ -8,8 +8,8 @@ use shared::HabitWithCompletions;
 struct HabitProps {
     habit: HabitWithCompletions,
 }
-#[function_component(Habit)]
-fn habit_list(HabitProps { habit }: &HabitProps) -> Html {
+#[function_component]
+fn Habit(HabitProps { habit }: &HabitProps) -> Html {
     let clicks = use_state(|| 0);
     let other_clicks = clicks.clone();
     let name = habit.habit.name.clone();
@@ -37,8 +37,8 @@ struct HabitListProps {
     habits: Vec<HabitWithCompletions>,
 }
 
-#[function_component(HabitList)]
-fn habit_list(HabitListProps { habits }: &HabitListProps) -> Html {
+#[function_component]
+fn HabitList(HabitListProps { habits }: &HabitListProps) -> Html {
     habits
         .iter()
         .map(|habit| {
@@ -47,8 +47,8 @@ fn habit_list(HabitListProps { habits }: &HabitListProps) -> Html {
         .collect()
 }
 
-#[function_component(App)]
-fn app() -> Html {
+#[function_component]
+fn App() -> Html {
     let habits = use_state(|| vec![]);
     {
         let habits = habits.clone();
