@@ -10,6 +10,16 @@ struct HabitProps {
     habit: HabitWithCompletions,
 }
 
+fn color_from_urgency(urgency: f64) -> String {
+    if urgency <= 0.0 {
+        "#05c46b".to_string()
+    } else if urgency <= 0.5 {
+        "#ffa801".to_string()
+    } else {
+        "#ff3f34".to_string()
+    }
+}
+
 #[styled_component]
 fn Habit(HabitProps { habit }: &HabitProps) -> Html {
     let clicks = use_state(|| 0);
@@ -25,7 +35,7 @@ fn Habit(HabitProps { habit }: &HabitProps) -> Html {
     };
     html! {
     <div onclick={onclick} class={css!("
-            background: #05c46b;
+            background: ${bg};
             color: #d2dae2;
             border-radius: 20px;
             padding: 20px;
@@ -35,7 +45,7 @@ fn Habit(HabitProps { habit }: &HabitProps) -> Html {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-        ")}>
+        ", bg = color_from_urgency(habit.urgency()))}>
         <div class={css!("display: flex; flex-direction: column;")}>
             <h2 class={css!("font-size: 2em; margin: 0px;")}>{&habit.habit.name}</h2>
             <p class={css!("font-size: 1em; opacity: 0.8; margin: 0.5em 0 0.5em 0;")}>{&habit.habit.desciription}</p>
