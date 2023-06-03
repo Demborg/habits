@@ -40,11 +40,11 @@ fn Habit(HabitProps { habit }: &HabitProps) -> Html {
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 0.5rem;
-            width: 300px;
             box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            overflow: hidden;
         ", bg = color_from_urgency(habit.urgency()))}>
         <div class={css!("display: flex; flex-direction: column;")}>
             <h2 class={css!("font-size: 2em; margin: 0px;")}>{&habit.habit.name}</h2>
@@ -101,7 +101,9 @@ fn App() -> Html {
             <Global css={css!("background: #1e272e;")} />
             <div class={css!("display: flex; align-items: center; justify-content: center; flex-direction: column;")}>
                 <h1 class={css!("color: #d2dae2;")}>{ "Habits" }</h1>
-                <HabitList habits={(*habits).clone()} />
+                <div class={css!("width: 100%; max-width: 300px;")}>
+                    <HabitList habits={(*habits).clone()}/>
+                </div>
             </div>
         </>
     }
