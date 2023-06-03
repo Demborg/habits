@@ -11,9 +11,9 @@ struct HabitProps {
 }
 
 fn color_from_urgency(urgency: f64) -> String {
-    if urgency <= 0.0 {
+    if urgency <= 0.25 {
         "#05c46b".to_string()
-    } else if urgency <= 0.5 {
+    } else if urgency <= 0.7 {
         "#ffa801".to_string()
     } else {
         "#ff3f34".to_string()
