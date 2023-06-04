@@ -76,6 +76,39 @@ fn HabitList(HabitListProps { habits, callback}: &HabitListProps) -> Html {
 }
 
 #[styled_component]
+fn Modal() -> Html {
+    let onsubmit = move |_| {
+        let habit = shared::Habit {
+            name: "testing again".to_string(),
+            desciription: "".to_string(),
+            cadance: shared::Cadance::Daily,
+            reps: 10,
+        };
+        wasm_bindgen_futures::spawn_local(async move {
+            Request::post("/habit").json(&habit).unwrap().send().await.expect("Couldn't complete");
+            log!("Created a task");
+        });
+    };
+    html!(
+        <>
+            <h2>{"New habit"}</h2>
+            <form method="dialog" onsubmit={onsubmit}>
+                <input placeholder={"name"} required={true}/>
+                <input placeholder={"description"} />
+                <input type={"number"} required={true} placeholder={"reps"} />
+                <select>
+                    <option value="Daily">{"Daily"}</option>
+                    <option value="Weekly">{"Weekly"}</option>
+                    <option value="Monthly">{"Monthly"}</option>
+                </select>
+                <button>{"Add"}</button>
+            </form>
+        </>
+    )
+
+}
+
+#[styled_component]
 fn App() -> Html {
     let habits = use_state(|| vec![]);
     let flag = use_state(|| 0);
@@ -114,18 +147,7 @@ fn App() -> Html {
         <>
             <Global css={css!("background: #1e272e;")} />
             <dialog ref={modal_ref}>
-                <h2>{"New habit"}</h2>
-                <form method="dialog">
-                    <input placeholder={"name"} />
-                    <input placeholder={"description"} />
-                    <input placeholder={"reps"} />
-                    <select>
-                        <option value="Daily">{"Daily"}</option>
-                        <option value="Weekly">{"Weekly"}</option>
-                        <option value="Monthly">{"Monthly"}</option>
-                    </select>
-                    <button>{"Add"}</button>
-                </form>
+                <Modal/>
             </dialog>
             <div class={css!("display: flex; align-items: center; justify-content: center; flex-direction: column;")}>
                 <h1 class={css!("color: #d2dae2;")} onclick={open_modal}>{ "Habits" }</h1>
