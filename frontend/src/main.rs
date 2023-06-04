@@ -2,6 +2,7 @@ use gloo_console::log;
 use gloo_net::http::Request;
 use stylist::yew::{styled_component, Global};
 use yew::prelude::*;
+use web_sys::HtmlDialogElement;
 
 use shared::HabitWithCompletions;
 
@@ -102,11 +103,32 @@ fn App() -> Html {
         let flag = flag.clone();
         Callback::from(move |_| flag.set(*flag + 1))
     };
+    let modal_ref = use_node_ref();
+    let open_modal = Callback::from({
+        let modal_ref = modal_ref.clone();
+        move |_| {
+            modal_ref.cast::<HtmlDialogElement>().unwrap().show_modal().unwrap();
+        }
+    });
     html! {
         <>
             <Global css={css!("background: #1e272e;")} />
+            <dialog ref={modal_ref}>
+                <h2>{"New habit"}</h2>
+                <form method="dialog">
+                    <input placeholder={"name"} />
+                    <input placeholder={"description"} />
+                    <input placeholder={"reps"} />
+                    <select>
+                        <option value="Daily">{"Daily"}</option>
+                        <option value="Weekly">{"Weekly"}</option>
+                        <option value="Monthly">{"Monthly"}</option>
+                    </select>
+                    <button>{"Add"}</button>
+                </form>
+            </dialog>
             <div class={css!("display: flex; align-items: center; justify-content: center; flex-direction: column;")}>
-                <h1 class={css!("color: #d2dae2;")}>{ "Habits" }</h1>
+                <h1 class={css!("color: #d2dae2;")} onclick={open_modal}>{ "Habits" }</h1>
                 <div class={css!("width: 100%; max-width: 300px;")}>
                     <HabitList habits={(*habits).clone()} callback={callback}/>
                 </div>

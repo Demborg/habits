@@ -127,6 +127,7 @@ dependencies = [
  "shared",
  "stylist",
  "wasm-bindgen-futures",
+ "web-sys",
  "yew",
 ]
 
