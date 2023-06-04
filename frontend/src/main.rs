@@ -45,31 +45,64 @@ fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
         });
         callback2.emit(());
     };
+    let modal_ref = use_node_ref();
+    let open_modal = Callback::from({
+        let modal_ref = modal_ref.clone();
+        move |e: MouseEvent| {
+            e.stop_propagation();
+            modal_ref
+                .cast::<HtmlDialogElement>()
+                .unwrap()
+                .show_modal()
+                .unwrap();
+        }
+    });
     html! {
-    <div onclick={onclick} class={css!("
-            background: ${bg};
+    <>
+        <dialog ref={modal_ref} class={css!("
+            background: #808e9b;
             color: #d2dae2;
             border-radius: 20px;
             padding: 20px;
-            margin-bottom: 0.5rem;
+            width: 100%;
+            max-width: 300px;
             box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
-            display: flex;
             flex-direction: column;
             justify-content: space-between;
             overflow: hidden;
-        ", bg = color_from_urgency(habit.urgency()))}>
-        <div class={css!("display: flex; flex-direction: column;")}>
-            <div class={css!("display: flex; flex-direction: row; justify-content: space-between;")}>
-                <h2 class={css!("font-size: 2em; margin: 0px;")}>{&habit.habit.name}</h2>
-                <h2 class={css!("font-size: 1.5em; margin: 0px;")} onclick={delete}>{"🗑"}</h2>
+            border: 0px;
+        ")}>
+            <h2>{"Delete?"}</h2>
+            <form method="dialog" class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-around; margin-top: 1rem;")}>
+                <button onclick={delete}>{"Delete"}</button>
+                <button>{"Cancel"}</button>
+            </form>
+        </dialog>
+        <div onclick={onclick} class={css!("
+                background: ${bg};
+                color: #d2dae2;
+                border-radius: 20px;
+                padding: 20px;
+                margin-bottom: 0.5rem;
+                box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+            ", bg = color_from_urgency(habit.urgency()))}>
+            <div class={css!("display: flex; flex-direction: column;")}>
+                <div class={css!("display: flex; flex-direction: row; justify-content: space-between;")}>
+                    <h2 class={css!("font-size: 2em; margin: 0px;")}>{&habit.habit.name}</h2>
+                    <h2 class={css!("font-size: 1.5em; margin: 0px;")} onclick={open_modal}>{"🗑"}</h2>
+                </div>
+                <p class={css!("font-size: 1em; opacity: 0.8; margin: 0.5em 0 0.5em 0;")}>{&habit.habit.desciription}</p>
             </div>
-            <p class={css!("font-size: 1em; opacity: 0.8; margin: 0.5em 0 0.5em 0;")}>{&habit.habit.desciription}</p>
+            <div class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-between;")}>
+                <p class={css!("margin: 0;")}>{format!("{}/{}", habit.completed, habit.habit.reps)}</p>
+                <p class={css!("margin: 0;")}>{&habit.habit.cadance}</p>
+            </div>
         </div>
-        <div class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-between;")}>
-            <p class={css!("margin: 0;")}>{format!("{}/{}", habit.completed, habit.habit.reps)}</p>
-            <p class={css!("margin: 0;")}>{&habit.habit.cadance}</p>
-        </div>
-    </div>
+    </>
     }
 }
 
