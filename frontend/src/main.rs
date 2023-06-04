@@ -178,7 +178,19 @@ fn App() -> Html {
     html! {
         <>
             <Global css={css!("background: #1e272e;")} />
-            <dialog ref={modal_ref}>
+            <dialog ref={modal_ref} class={css!("
+                background: #808e9b;
+                color: #d2dae2;
+                border-radius: 20px;
+                padding: 20px;
+                width: 100%;
+                max-width: 300px;
+                box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+                border: 0px;
+            ")}>
                 <Modal callback={callback.clone()}/>
             </dialog>
             <div class={css!("display: flex; align-items: center; justify-content: center; flex-direction: column;")}>
