@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use axum::{
     extract::{Path, State},
     response::{IntoResponse, Response},
-    routing::{get, post},
+    routing::{get, post, delete},
     Json, Router,
 };
 use axum_extra::routing::SpaRouter;
@@ -87,6 +87,19 @@ async fn complete_habit(State(pool): State<PgPool>, Path(name): Path<String>) ->
         .expect("Expected to be able to complete habit");
 }
 
+async fn delete_habit(State(pool): State<PgPool>, Path(name): Path<String>) -> () {
+    sqlx::query("DELETE FROM habit_completions WHERE habit_id IN (SELECT id FROM habits WHERE name = $1)")
+        .bind(name.clone())
+        .execute(&pool)
+        .await
+        .expect("Expected to be able to complete habit");
+    sqlx::query("DELETE FROM habits WHERE name = $1")
+        .bind(name)
+        .execute(&pool)
+        .await
+        .expect("Expected to be able to delete habit");
+}
+
 #[shuttle_runtime::main]
 async fn axum(
     #[shuttle_shared_db::Postgres] pool: PgPool,
@@ -100,6 +113,7 @@ async fn axum(
     let router = Router::new()
         .route("/habits", get(habits))
         .route("/habit", post(create_habit))
+        .route("/habit/:name", delete(delete_habit))
         .route("/complete/:name", get(complete_habit))
         .merge(SpaRouter::new("/", frontend).index_file("index.html"))
         .with_state(pool);

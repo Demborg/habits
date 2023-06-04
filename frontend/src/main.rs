@@ -25,7 +25,9 @@ fn color_from_urgency(urgency: f64) -> String {
 #[styled_component]
 fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
     let name = habit.habit.name.clone();
+    let name2 = habit.habit.name.clone();
     let callback = callback.clone();
+    let callback2 = callback.clone();
     let onclick = move |_| {
         let url = format!("/complete/{}", name);
         wasm_bindgen_futures::spawn_local(async move {
@@ -33,6 +35,15 @@ fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
             log!("Completed the task!");
         });
         callback.emit(());
+    };
+    let delete = move |e: MouseEvent| {
+        e.stop_propagation();
+        let url = format!("/habit/{}", name2);
+        wasm_bindgen_futures::spawn_local(async move {
+            Request::delete(&url).send().await.expect("Couldn't complete");
+            log!("Deleted the task!");
+        });
+        callback2.emit(());
     };
     html! {
     <div onclick={onclick} class={css!("
@@ -48,7 +59,10 @@ fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
             overflow: hidden;
         ", bg = color_from_urgency(habit.urgency()))}>
         <div class={css!("display: flex; flex-direction: column;")}>
-            <h2 class={css!("font-size: 2em; margin: 0px;")}>{&habit.habit.name}</h2>
+            <div class={css!("display: flex; flex-direction: row; justify-content: space-between;")}>
+                <h2 class={css!("font-size: 2em; margin: 0px;")}>{&habit.habit.name}</h2>
+                <h2 class={css!("font-size: 1.5em; margin: 0px;")} onclick={delete}>{"🗑"}</h2>
+            </div>
             <p class={css!("font-size: 1em; opacity: 0.8; margin: 0.5em 0 0.5em 0;")}>{&habit.habit.desciription}</p>
         </div>
         <div class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-between;")}>
