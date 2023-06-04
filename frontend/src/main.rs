@@ -2,7 +2,7 @@ use gloo_console::log;
 use gloo_net::http::Request;
 use stylist::yew::{styled_component, Global};
 use yew::prelude::*;
-use web_sys::HtmlDialogElement;
+use web_sys::{HtmlDialogElement, HtmlInputElement, HtmlSelectElement};
 
 use shared::HabitWithCompletions;
 
@@ -77,12 +77,24 @@ fn HabitList(HabitListProps { habits, callback}: &HabitListProps) -> Html {
 
 #[styled_component]
 fn Modal() -> Html {
+    let name = use_node_ref();
+    let name_clone = name.clone();
+    let description = use_node_ref();
+    let description_clone = description.clone();
+    let reps = use_node_ref();
+    let reps_clone = reps.clone();
+    let cadence = use_node_ref();
+    let cadence_clone = cadence.clone();
     let onsubmit = move |_| {
+        let name = name_clone.cast::<HtmlInputElement>().unwrap().value();
+        let description = description_clone.cast::<HtmlInputElement>().unwrap().value();
+        let reps = reps_clone.cast::<HtmlInputElement>().unwrap().value_as_number();
+        let cadence = cadence_clone.cast::<HtmlSelectElement>().unwrap().value();
         let habit = shared::Habit {
-            name: "testing again".to_string(),
-            desciription: "".to_string(),
-            cadance: shared::Cadance::Daily,
-            reps: 10,
+            name: name,
+            desciription: description,
+            cadance: shared::Cadance::from(&cadence).unwrap(),
+            reps: reps as i32,
         };
         wasm_bindgen_futures::spawn_local(async move {
             Request::post("/habit").json(&habit).unwrap().send().await.expect("Couldn't complete");
@@ -93,13 +105,13 @@ fn Modal() -> Html {
         <>
             <h2>{"New habit"}</h2>
             <form method="dialog" onsubmit={onsubmit}>
-                <input placeholder={"name"} required={true}/>
-                <input placeholder={"description"} />
-                <input type={"number"} required={true} placeholder={"reps"} />
-                <select>
-                    <option value="Daily">{"Daily"}</option>
-                    <option value="Weekly">{"Weekly"}</option>
-                    <option value="Monthly">{"Monthly"}</option>
+                <input placeholder={"name"} required={true} ref={name}/>
+                <input placeholder={"description"} ref={description}/>
+                <input type={"number"} required={true} placeholder={"reps"} ref={reps}/>
+                <select ref={cadence}>
+                    <option value="daily">{"Daily"}</option>
+                    <option value="weekly">{"Weekly"}</option>
+                    <option value="monthly">{"Monthly"}</option>
                 </select>
                 <button>{"Add"}</button>
             </form>
