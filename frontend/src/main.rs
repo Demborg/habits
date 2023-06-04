@@ -1,8 +1,8 @@
 use gloo_console::log;
 use gloo_net::http::Request;
 use stylist::yew::{styled_component, Global};
-use yew::prelude::*;
 use web_sys::{HtmlDialogElement, HtmlInputElement, HtmlSelectElement};
+use yew::prelude::*;
 
 use shared::HabitWithCompletions;
 
@@ -23,7 +23,7 @@ fn color_from_urgency(urgency: f64) -> String {
 }
 
 #[styled_component]
-fn Habit(HabitProps { habit, callback}: &HabitProps) -> Html {
+fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
     let name = habit.habit.name.clone();
     let callback = callback.clone();
     let onclick = move |_| {
@@ -66,7 +66,7 @@ struct HabitListProps {
 }
 
 #[function_component]
-fn HabitList(HabitListProps { habits, callback}: &HabitListProps) -> Html {
+fn HabitList(HabitListProps { habits, callback }: &HabitListProps) -> Html {
     habits
         .iter()
         .map(|habit| {
@@ -87,8 +87,14 @@ fn Modal() -> Html {
     let cadence_clone = cadence.clone();
     let onsubmit = move |_| {
         let name = name_clone.cast::<HtmlInputElement>().unwrap().value();
-        let description = description_clone.cast::<HtmlInputElement>().unwrap().value();
-        let reps = reps_clone.cast::<HtmlInputElement>().unwrap().value_as_number();
+        let description = description_clone
+            .cast::<HtmlInputElement>()
+            .unwrap()
+            .value();
+        let reps = reps_clone
+            .cast::<HtmlInputElement>()
+            .unwrap()
+            .value_as_number();
         let cadence = cadence_clone.cast::<HtmlSelectElement>().unwrap().value();
         let habit = shared::Habit {
             name: name,
@@ -97,7 +103,12 @@ fn Modal() -> Html {
             reps: reps as i32,
         };
         wasm_bindgen_futures::spawn_local(async move {
-            Request::post("/habit").json(&habit).unwrap().send().await.expect("Couldn't complete");
+            Request::post("/habit")
+                .json(&habit)
+                .unwrap()
+                .send()
+                .await
+                .expect("Couldn't complete");
             log!("Created a task");
         });
     };
@@ -117,7 +128,6 @@ fn Modal() -> Html {
             </form>
         </>
     )
-
 }
 
 #[styled_component]
@@ -152,7 +162,11 @@ fn App() -> Html {
     let open_modal = Callback::from({
         let modal_ref = modal_ref.clone();
         move |_| {
-            modal_ref.cast::<HtmlDialogElement>().unwrap().show_modal().unwrap();
+            modal_ref
+                .cast::<HtmlDialogElement>()
+                .unwrap()
+                .show_modal()
+                .unwrap();
         }
     });
     html! {
