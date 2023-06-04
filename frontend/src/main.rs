@@ -75,8 +75,13 @@ fn HabitList(HabitListProps { habits, callback }: &HabitListProps) -> Html {
         .collect()
 }
 
+#[derive(Properties, PartialEq)]
+struct ModalProps {
+    callback: Callback<()>,
+}
 #[styled_component]
-fn Modal() -> Html {
+fn Modal(ModalProps { callback }: &ModalProps) -> Html {
+    let callback = callback.clone();
     let name = use_node_ref();
     let name_clone = name.clone();
     let description = use_node_ref();
@@ -111,6 +116,7 @@ fn Modal() -> Html {
                 .expect("Couldn't complete");
             log!("Created a task");
         });
+        callback.emit(());
     };
     html!(
         <>
@@ -173,7 +179,7 @@ fn App() -> Html {
         <>
             <Global css={css!("background: #1e272e;")} />
             <dialog ref={modal_ref}>
-                <Modal/>
+                <Modal callback={callback.clone()}/>
             </dialog>
             <div class={css!("display: flex; align-items: center; justify-content: center; flex-direction: column;")}>
                 <h1 class={css!("color: #d2dae2;")} onclick={open_modal}>{ "Habits" }</h1>
