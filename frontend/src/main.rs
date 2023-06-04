@@ -78,10 +78,12 @@ fn HabitList(HabitListProps { habits, callback }: &HabitListProps) -> Html {
 #[derive(Properties, PartialEq)]
 struct ModalProps {
     callback: Callback<()>,
+    close: Callback<()>,
 }
 #[styled_component]
-fn Modal(ModalProps { callback }: &ModalProps) -> Html {
+fn Modal(ModalProps { callback, close }: &ModalProps) -> Html {
     let callback = callback.clone();
+    let close = close.clone();
     let name = use_node_ref();
     let name_clone = name.clone();
     let description = use_node_ref();
@@ -121,16 +123,21 @@ fn Modal(ModalProps { callback }: &ModalProps) -> Html {
     html!(
         <>
             <h2>{"New habit"}</h2>
-            <form method="dialog" onsubmit={onsubmit}>
-                <input placeholder={"name"} required={true} ref={name}/>
-                <input placeholder={"description"} ref={description}/>
-                <input type={"number"} required={true} placeholder={"reps"} ref={reps}/>
-                <select ref={cadence}>
-                    <option value="daily">{"Daily"}</option>
-                    <option value="weekly">{"Weekly"}</option>
-                    <option value="monthly">{"Monthly"}</option>
-                </select>
-                <button>{"Add"}</button>
+            <form method="dialog" onsubmit={onsubmit} class={css!("overflow: hidden;")}>
+                <input placeholder={"name"} required={true} ref={name} class={css!("width: 100%;")}/>
+                <input placeholder={"description"} ref={description} class={css!("width: 100%;")}/>
+                <div class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-between;")}>
+                    <input type={"number"} required={true} placeholder={"reps"} ref={reps}/>
+                    <select ref={cadence}>
+                        <option value="daily">{"Daily"}</option>
+                        <option value="weekly">{"Weekly"}</option>
+                        <option value="monthly">{"Monthly"}</option>
+                    </select>
+                </div>
+                <div class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-around; margin-top: 1rem;")}>
+                    <button>{"Add"}</button>
+                    <button type="reset" onclick={move |_| close.emit(())}>{"Cancel"}</button>
+                </div>
             </form>
         </>
     )
@@ -175,6 +182,12 @@ fn App() -> Html {
                 .unwrap();
         }
     });
+    let close_modal = Callback::from({
+        let modal_ref = modal_ref.clone();
+        move |_| {
+            modal_ref.cast::<HtmlDialogElement>().unwrap().close();
+        }
+    });
     html! {
         <>
             <Global css={css!("background: #1e272e;")} />
@@ -191,7 +204,7 @@ fn App() -> Html {
                 overflow: hidden;
                 border: 0px;
             ")}>
-                <Modal callback={callback.clone()}/>
+                <Modal callback={callback.clone()} close={close_modal}/>
             </dialog>
             <div class={css!("display: flex; align-items: center; justify-content: center; flex-direction: column;")}>
                 <h1 class={css!("color: #d2dae2;")} onclick={open_modal}>{ "Habits" }</h1>
