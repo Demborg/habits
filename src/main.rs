@@ -44,13 +44,14 @@ async fn get_completed(pool: &PgPool, habit: &Habit) -> i64 {
 }
 
 async fn habits(State(pool): State<PgPool>) -> Response {
-    let rows = sqlx::query("SELECT name, description, cadence, reps FROM habits")
+    let rows = sqlx::query("SELECT id, name, description, cadence, reps FROM habits")
         .fetch_all(&pool)
         .await
         .map_err(shuttle_runtime::CustomError::new)
         .unwrap();
 
     let habits = rows.into_iter().map(|row| Habit {
+        id: row.get("id"),
         name: row.get("name"),
         desciription: row.get("description"),
         cadance: Cadance::from(row.get("cadence")).unwrap(),

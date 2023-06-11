@@ -25,6 +25,7 @@ pub struct Habit {
     pub desciription: String,
     pub cadance: Cadance,
     pub reps: i32,
+    pub id: Option<i32>,
 }
 
 pub type Completions = Vec<(String, i64)>;

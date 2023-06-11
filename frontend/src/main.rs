@@ -151,6 +151,7 @@ fn Modal(ModalProps { callback, close }: &ModalProps) -> Html {
             .value_as_number();
         let cadence = cadence_clone.cast::<HtmlSelectElement>().unwrap().value();
         let habit = shared::Habit {
+            id: None,
             name: name,
             desciription: description,
             cadance: shared::Cadance::from(&cadence).unwrap(),
