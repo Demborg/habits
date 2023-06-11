@@ -24,12 +24,11 @@ fn color_from_urgency(urgency: f64) -> String {
 
 #[styled_component]
 fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
-    let name = habit.habit.name.clone();
-    let name2 = habit.habit.name.clone();
+    let id = habit.habit.id;
     let callback = callback.clone();
     let callback2 = callback.clone();
     let onclick = move |_| {
-        let url = format!("/complete/{}", name);
+        let url = format!("complete/{}", id.unwrap());
         wasm_bindgen_futures::spawn_local(async move {
             Request::get(&url).send().await.expect("Couldn't complete");
             log!("Completed the task!");
@@ -38,7 +37,7 @@ fn Habit(HabitProps { habit, callback }: &HabitProps) -> Html {
     };
     let delete = move |e: MouseEvent| {
         e.stop_propagation();
-        let url = format!("/habit/{}", name2);
+        let url = format!("/habit/{}", id.unwrap());
         wasm_bindgen_futures::spawn_local(async move {
             Request::delete(&url).send().await.expect("Couldn't complete");
             log!("Deleted the task!");

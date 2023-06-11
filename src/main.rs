@@ -20,8 +20,15 @@ fn date_pattern(cadance: &Cadance) -> String {
 }
 
 async fn get_history(pool: &PgPool, habit: &Habit) -> Completions {
-    let rows = sqlx::query("SELECT TO_CHAR(completion_timestamp, $2) as day, COUNT(completion_timestamp) as count FROM habit_completions INNER JOIN habits ON habits.id = habit_completions.habit_id WHERE name = $1 GROUP BY TO_CHAR(completion_timestamp, $2) ORDER BY MAX(completion_timestamp)")
-        .bind(&habit.name)
+    let rows = sqlx::query(r#"
+        SELECT
+            TO_CHAR(completion_timestamp, $2) as day,
+            COUNT(completion_timestamp) as count
+        FROM habit_completions 
+        WHERE habit_id = $1
+        GROUP BY TO_CHAR(completion_timestamp, $2)
+        ORDER BY MAX(completion_timestamp)"#)
+        .bind(&habit.id.unwrap())
         .bind(date_pattern(&habit.cadance))
         .fetch_all(pool)
         .await
@@ -34,8 +41,14 @@ async fn get_history(pool: &PgPool, habit: &Habit) -> Completions {
 }
 
 async fn get_completed(pool: &PgPool, habit: &Habit) -> i64 {
-    sqlx::query("SELECT COUNT(habit_completions.id) as count FROM habit_completions INNER JOIN habits ON habits.id = habit_completions.habit_id WHERE name = $1 AND TO_CHAR(completion_timestamp, $2) = TO_CHAR(NOW(), $2)")
-        .bind(&habit.name)
+    sqlx::query(r#"
+        SELECT
+            COUNT(habit_completions.id) as count
+        FROM habit_completions
+        WHERE
+            habit_id = $1
+            AND TO_CHAR(completion_timestamp, $2) = TO_CHAR(NOW(), $2)"#)
+        .bind(&habit.id.unwrap())
         .bind(date_pattern(&habit.cadance))
         .fetch_one(pool)
         .await
@@ -80,22 +93,22 @@ async fn create_habit(State(pool): State<PgPool>, Json(habit): Json<Habit>) -> (
         .expect("Expected to be able to create habit");
 }
 
-async fn complete_habit(State(pool): State<PgPool>, Path(name): Path<String>) -> () {
-    sqlx::query("INSERT INTO habit_completions (habit_id) SELECT id FROM habits WHERE name = $1")
-        .bind(name)
+async fn complete_habit(State(pool): State<PgPool>, Path(id): Path<i64>) -> () {
+    sqlx::query("INSERT INTO habit_completions (habit_id) VALUES ($1)")
+        .bind(id)
         .execute(&pool)
         .await
         .expect("Expected to be able to complete habit");
 }
 
-async fn delete_habit(State(pool): State<PgPool>, Path(name): Path<String>) -> () {
-    sqlx::query("DELETE FROM habit_completions WHERE habit_id IN (SELECT id FROM habits WHERE name = $1)")
-        .bind(name.clone())
+async fn delete_habit(State(pool): State<PgPool>, Path(id): Path<i64>) -> () {
+    sqlx::query("DELETE FROM habit_completions WHERE habit_id = $1")
+        .bind(id.clone())
         .execute(&pool)
         .await
         .expect("Expected to be able to complete habit");
-    sqlx::query("DELETE FROM habits WHERE name = $1")
-        .bind(name)
+    sqlx::query("DELETE FROM habits WHERE id = $1")
+        .bind(id)
         .execute(&pool)
         .await
         .expect("Expected to be able to delete habit");
@@ -114,8 +127,8 @@ async fn axum(
     let router = Router::new()
         .route("/habits", get(habits))
         .route("/habit", post(create_habit))
-        .route("/habit/:name", delete(delete_habit))
-        .route("/complete/:name", get(complete_habit))
+        .route("/habit/:id", delete(delete_habit))
+        .route("/complete/:id", get(complete_habit))
         .merge(SpaRouter::new("/", frontend).index_file("index.html"))
         .with_state(pool);
     Ok(router.into())
