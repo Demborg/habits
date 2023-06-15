@@ -1,3 +1,5 @@
+use std::cmp::max;
+
 use chrono::{TimeZone, Datelike, Local, Duration};
 use serde::{Serialize, Deserialize};
 
@@ -72,7 +74,11 @@ impl Cadance {
 
 impl HabitWithCompletions {
     pub fn urgency(&self) -> f64 {
-        let remaning_work = (self.habit.reps as i64 - self.completed) as f64 / self.habit.reps as f64;
-        remaning_work / self.habit.cadance.remaining_percenteage()
+        let remaning_work = (self.habit.reps as i64 - self.completed) as f64 / max(self.habit.reps, 1) as f64;
+        
+        match self.habit.anti_habit {
+            false => remaning_work - self.habit.cadance.remaining_percenteage(),
+            true => -self.habit.cadance.remaining_percenteage() - remaning_work
+        }
     }   
 }
