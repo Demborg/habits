@@ -57,7 +57,7 @@ async fn get_completed(pool: &PgPool, habit: &Habit) -> i64 {
 }
 
 async fn habits(State(pool): State<PgPool>) -> Response {
-    let rows = sqlx::query("SELECT id, name, description, cadence, reps FROM habits")
+    let rows = sqlx::query("SELECT id, name, description, cadence, reps, anti_habit FROM habits")
         .fetch_all(&pool)
         .await
         .map_err(shuttle_runtime::CustomError::new)
@@ -69,6 +69,7 @@ async fn habits(State(pool): State<PgPool>) -> Response {
         desciription: row.get("description"),
         cadance: Cadance::from(row.get("cadence")).unwrap(),
         reps: row.get("reps"),
+        anti_habit: row.get("anti_habit"),
     });
 
     let mut result: Vec<HabitWithCompletions> = vec![];
@@ -83,11 +84,12 @@ async fn habits(State(pool): State<PgPool>) -> Response {
 }
 
 async fn create_habit(State(pool): State<PgPool>, Json(habit): Json<Habit>) -> () {
-    sqlx::query("INSERT INTO habits (name, description, cadence, reps) VALUES ($1, $2, $3, $4)")
+    sqlx::query("INSERT INTO habits (name, description, cadence, reps, anti_habit) VALUES ($1, $2, $3, $4, $5)")
         .bind(habit.name)
         .bind(habit.desciription)
         .bind(habit.cadance.to_string())
         .bind(habit.reps)
+        .bind(habit.anti_habit)
         .execute(&pool)
         .await
         .expect("Expected to be able to create habit");

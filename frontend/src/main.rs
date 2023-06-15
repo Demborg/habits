@@ -134,6 +134,8 @@ fn Modal(ModalProps { callback, close }: &ModalProps) -> Html {
     let name_clone = name.clone();
     let description = use_node_ref();
     let description_clone = description.clone();
+    let anti = use_node_ref();
+    let anti_clone = anti.clone();
     let reps = use_node_ref();
     let reps_clone = reps.clone();
     let cadence = use_node_ref();
@@ -149,9 +151,11 @@ fn Modal(ModalProps { callback, close }: &ModalProps) -> Html {
             .unwrap()
             .value_as_number();
         let cadence = cadence_clone.cast::<HtmlSelectElement>().unwrap().value();
+        let anti = anti_clone.cast::<HtmlInputElement>().unwrap().checked();
         let habit = shared::Habit {
             id: None,
             name: name,
+            anti_habit: anti,
             desciription: description,
             cadance: shared::Cadance::from(&cadence).unwrap(),
             reps: reps as i32,
@@ -174,6 +178,7 @@ fn Modal(ModalProps { callback, close }: &ModalProps) -> Html {
                 <input placeholder={"name"} required={true} ref={name} class={css!("width: 100%;")}/>
                 <input placeholder={"description"} ref={description} class={css!("width: 100%;")}/>
                 <div class={css!("display: flex; flex-direction: row; font-size: 1.2em; justify-content: space-between;")}>
+                    <input type={"checkbox"} required={false} ref={anti}/>
                     <input type={"number"} required={true} placeholder={"reps"} ref={reps}/>
                     <select ref={cadence}>
                         <option value="daily">{"Daily"}</option>
