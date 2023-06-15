@@ -1,0 +1,13 @@
+{
+    "name": "Habits",
+    "version": "0.1",
+    "manifest_version": 2,
+    "icons": [{
+        "src": "./icon-256.png",
+        "sizes": "256x256",
+        "type": "image/png"
+    }],
+    "display": "standalone",
+    "background_color": "#1e272e",
+    "orientation": "portrait-primary"
+}
